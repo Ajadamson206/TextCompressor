@@ -21,16 +21,12 @@ void printHelp() {
     \nUse -h to bring this menu up again\n");
 }
 
-inline void unrecognizedInput() {
-    fprintf(stderr, "Unrecognized Input, use \"-h\" for help\n");
-}
-
 int main(int argc, char* argv[]) {
     Flags currentFlags = {NULL, -1, NULL, NULL};
     int opt;
 
     if(argc <= 1 || argc > 7) {
-        unrecognizedInput();
+        fprintf(stderr, "Unrecognized Input, use \"-h\" for help\n");
         return 1;
     }
 
@@ -59,7 +55,7 @@ int main(int argc, char* argv[]) {
             break;
 
         default:
-            unrecognizedInput();
+            fprintf(stderr, "Unrecognized Input, use \"-h\" for help\n");
             return 1;
         }
     }
