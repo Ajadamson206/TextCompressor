@@ -28,12 +28,12 @@ void encode(Flags* commandLineArgs) {
     FrequencyArray** characterFrequencies = frequencyMap(myFiles.inputFile, &arrayLength);
 
     // Convert the frequency map to a binary tree
-    BinaryTree* createHuffmanCoding(characterFrequencies, arrayLength);
+    BinaryTree* huffmanTree = createHuffmanCoding(characterFrequencies, arrayLength);
 
     // Write Binary Tree to a Key File
 
     // Write Binary to Output File using Binary Tree
-    
+
 }
 
 FrequencyArray** frequencyMap(FILE* textFile, int* frequencyArrayLength) {
@@ -64,10 +64,10 @@ FrequencyArray** frequencyMap(FILE* textFile, int* frequencyArrayLength) {
     uniqueCharacters--;    
     
     for(char i = 0; i >= 0; i++) {
-        if(characterMap[i] != 0) {
+        if(characterMap[(unsigned char)i] != 0) {
             array[uniqueCharacters] = malloc(sizeof(**array));
             array[uniqueCharacters]->character = i;
-            array[uniqueCharacters]->frequency = characterMap[i];
+            array[uniqueCharacters]->frequency = characterMap[(unsigned char)i];
 
             uniqueCharacters--;
         }

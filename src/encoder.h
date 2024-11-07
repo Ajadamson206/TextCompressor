@@ -10,4 +10,4 @@ typedef struct {
 } FrequencyArray;
 
 extern void encode(Flags* commandLineArgs);
-extern FrequencyArray** frequencyMap(FILE* textFile);
+extern FrequencyArray** frequencyMap(FILE* textFile, int* frequencyArrayLength);

@@ -2,14 +2,6 @@
 #include "binary_tree.h"
 #include <stdlib.h>
 
-typedef struct {
-    char character;
-    __uint128_t frequency;
-
-    Heap* left;
-    Heap* right;
-} Heap;
-
 Heap* createRoot(char character1, __uint128_t frequency1, char character2, __uint128_t frequency2) {
     Heap* root = malloc(sizeof(*root));
     root->character = -1;
@@ -37,8 +29,6 @@ Heap* mergeHeaps(Heap* heap1, Heap* heap2) {
     return merged;
 }
 
-typedef Heap BinaryTree;
-
 BinaryTree* createHuffmanCoding(FrequencyArray** frequencyMap, int mapLength) {
     // Move the elements of frequency map into a heap
     Heap** myHeap = malloc(sizeof(*myHeap) * ((mapLength + (mapLength & 1)) / 2));    
@@ -52,7 +42,7 @@ BinaryTree* createHuffmanCoding(FrequencyArray** frequencyMap, int mapLength) {
 
     // If the heap is of an odd length then the remaining element moves onto the next iteration
     if(mapLength & 1) {
-        myHeap[heapIndex] == malloc(sizeof(myHeap[heapIndex]));
+        myHeap[heapIndex] = malloc(sizeof(myHeap[heapIndex]));
         myHeap[heapIndex]->character = frequencyMap[mapLength - 1]->character;
         myHeap[heapIndex]->frequency = frequencyMap[mapLength - 1]->frequency;
         myHeap[heapIndex]->left = NULL; 
@@ -86,7 +76,7 @@ BinaryTree* createHuffmanCoding(FrequencyArray** frequencyMap, int mapLength) {
 }
 
 void writeTreeToFile(FILE* keyFile, BinaryTree* tree) {
-    
+    return;
 }
 
 void freeTree(BinaryTree* tree) {

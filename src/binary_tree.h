@@ -2,12 +2,12 @@
 
 #include "encoder.h"
 
-typedef struct {
+typedef struct Heap{
     char character;
     __uint128_t frequency;
 
-    Heap* left;
-    Heap* right;
+    struct Heap* left;
+    struct Heap* right;
 } Heap;
 
 typedef Heap BinaryTree;
