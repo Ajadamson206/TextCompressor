@@ -2,19 +2,18 @@
 #include "binary_tree.h"
 #include <stdlib.h>
 
-Heap* createRoot(char character1, __uint128_t frequency1, char character2, __uint128_t frequency2) {
+static PathSeparator globPathSeparator;
+
+Heap* createRoot(char character1, char character2) {
     Heap* root = malloc(sizeof(*root));
     root->character = -1;
-    root->frequency = frequency1 + frequency2;
 
     root->left = calloc(1, sizeof(*root));
     root->right = calloc(1, sizeof(*root));
 
     root->left->character = character1;
-    root->left->frequency = frequency1;  
 
     root->right->character = character2;
-    root->right->frequency = frequency2;  
 
     return root; 
 }
@@ -22,7 +21,6 @@ Heap* createRoot(char character1, __uint128_t frequency1, char character2, __uin
 Heap* mergeHeaps(Heap* heap1, Heap* heap2) {
     Heap* merged = malloc(sizeof(*merged));
     merged->character = -1;
-    merged->frequency = heap1->frequency + heap2->frequency;
     merged->left = heap1;
     merged->right = heap2;
 
@@ -34,9 +32,7 @@ BinaryTree* createHuffmanCoding(FrequencyArray** frequencyMap, int mapLength) {
     Heap** myHeap = malloc(sizeof(*myHeap) * ((mapLength + (mapLength & 1)) / 2));    
     int heapIndex = 0;
     for(int i = 0; i < mapLength - 1; i += 2) {
-        myHeap[heapIndex] = createRoot(frequencyMap[i]->character, frequencyMap[i]->frequency, 
-                               frequencyMap[i+1]->character, frequencyMap[i+1]->frequency);
-
+        myHeap[heapIndex] = createRoot(frequencyMap[i]->character, frequencyMap[i+1]->character);
         heapIndex++;
     }
 
@@ -44,7 +40,6 @@ BinaryTree* createHuffmanCoding(FrequencyArray** frequencyMap, int mapLength) {
     if(mapLength & 1) {
         myHeap[heapIndex] = malloc(sizeof(myHeap[heapIndex]));
         myHeap[heapIndex]->character = frequencyMap[mapLength - 1]->character;
-        myHeap[heapIndex]->frequency = frequencyMap[mapLength - 1]->frequency;
         myHeap[heapIndex]->left = NULL; 
         myHeap[heapIndex]->right = NULL;
         heapIndex++;
@@ -65,7 +60,6 @@ BinaryTree* createHuffmanCoding(FrequencyArray** frequencyMap, int mapLength) {
             heapIndex++;
         }
 
-
         heapLength = heapIndex;
     }
 
@@ -73,10 +67,6 @@ BinaryTree* createHuffmanCoding(FrequencyArray** frequencyMap, int mapLength) {
     free(myHeap);
 
     return root;
-}
-
-void writeTreeToFile(FILE* keyFile, BinaryTree* tree) {
-    return;
 }
 
 void freeTree(BinaryTree* tree) {
@@ -94,4 +84,27 @@ void freeHeap(Heap* heap) {
 
     freeHeap(heap->right);
     free(heap->right);
+}
+
+TreeMap** createTreeMap(BinaryTree* root) {
+    TreeMap** map = calloc(128, sizeof(*map));
+
+    treeTraverser((Heap*)root, 1, 0, map);
+
+    return map;
+}
+
+void treeTraverser(Heap* root, char row, char path, TreeMap** map) {
+    if(root->character != -1) {
+        map[root->character] = malloc(sizeof(*(map[root->character])));
+        globPathSeparator.pathIndex[0] = path;
+        globPathSeparator.pathIndex[1] = row;
+
+        map[root->character]->combinedPath = globPathSeparator.combined;
+        return;
+    }
+
+    treeTraverser(root->left, row + 1, path, map);
+
+    treeTraverser(root->right, row + 1, path | (1<<(8-row)), map);
 }

@@ -4,6 +4,8 @@
 #include "encoder.h"
 #include "binary_tree.h"
 
+static PathSeparator encoderPathSeparator;
+
 static int compareFreqArray(const void* element1, const void* element2) {
     FrequencyArray* a = *(FrequencyArray**)element1;
     FrequencyArray* b = *(FrequencyArray**)element2;
@@ -24,22 +26,34 @@ void encode(Flags* commandLineArgs) {
     Files myFiles = openEncoderFiles(commandLineArgs);
 
     // Make a frequency map for each character.
-    int arrayLength;
+    unsigned char arrayLength;
     FrequencyArray** characterFrequencies = frequencyMap(myFiles.inputFile, &arrayLength);
+    
+    // Write Binary Tree to Output File -> Number of elements in the array, the order of elements
+    writeKeyPattern(myFiles.outputFile, characterFrequencies, (unsigned char)arrayLength);
 
     // Convert the frequency map to a binary tree
     BinaryTree* huffmanTree = createHuffmanCoding(characterFrequencies, arrayLength);
 
-    // Write Binary Tree to a Key File
+    // Free characterFrequencies
+    freeFrequencyArray(characterFrequencies, arrayLength);
 
     // Write Binary to Output File using Binary Tree
 
+
 }
 
-FrequencyArray** frequencyMap(FILE* textFile, int* frequencyArrayLength) {
+void writeKeyPattern(FILE* outputFile, FrequencyArray** array, unsigned char arrayLength) {
+    fwrite(arrayLength, sizeof(unsigned char), 1, outputFile);
+    for(unsigned char i = 0; i < arrayLength; i++) {
+        fwrite(array[i]->character, sizeof(unsigned char), 1, outputFile);
+    }
+}
+
+FrequencyArray** frequencyMap(FILE* textFile, unsigned char* frequencyArrayLength) {
     __uint128_t characterMap[128] = {0};  
     __uint128_t characterCount = 0;
-    __uint8_t uniqueCharacters = 0;
+    unsigned char uniqueCharacters = 0;
 
     int character;
     while((character = fgetc(textFile)) != EOF) {
@@ -50,6 +64,8 @@ FrequencyArray** frequencyMap(FILE* textFile, int* frequencyArrayLength) {
         characterCount++;
     }
 
+    rewind(textFile);
+
     if(uniqueCharacters == 0) {
         fprintf(stderr, "Unable to read from file");
         exit(EXIT_FAILURE);
@@ -57,8 +73,9 @@ FrequencyArray** frequencyMap(FILE* textFile, int* frequencyArrayLength) {
 
     // We are going to use the null byte to represent the end of the file
     characterMap[0]++;
-
-    int arrayLength = uniqueCharacters;
+    uniqueCharacters++;
+    size_t arrayLength = uniqueCharacters;
+    *frequencyArrayLength = uniqueCharacters;
 
     FrequencyArray** array = malloc(sizeof(*array) * uniqueCharacters);
     uniqueCharacters--;    
@@ -75,6 +92,30 @@ FrequencyArray** frequencyMap(FILE* textFile, int* frequencyArrayLength) {
 
     qsort(array, arrayLength, sizeof(*array), compareFreqArray);    
 
-    *frequencyArrayLength = arrayLength;
     return array;
+}
+
+void freeFrequencyArray(FrequencyArray** array, unsigned char arrayLength) {
+    FrequencyArray** start = array;
+    for(int i = 0; i < arrayLength; i++) {
+        free(*array++);
+    }
+
+    free(start);
+}
+
+void convertFile(FILE* outputFile, BinaryTree* tree, FILE* inputFile) {
+    char writeBuffer = 0;
+    unsigned char bufferIndex = 7; // 2^7 is the firstIndex on the left 
+
+    // Convert Binary Tree to a map
+    TreeMap** map = createTreeMap(tree);
+
+    // Write encoded version of the input file to the output file
+    int character;
+    while((character = fgetc(inputFile)) != EOF) {
+        // Read character
+        // Find length of encoded version
+    }
+
 }
