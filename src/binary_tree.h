@@ -27,5 +27,6 @@ extern void freeTree(BinaryTree* tree);
 extern void freeHeap(Heap* heap);
 extern TreeMap** createTreeMap(BinaryTree* root);
 extern void treeTraverser(Heap* root, char row, char path, TreeMap** map);
+extern void freeTreeMap(TreeMap** map);
 
 

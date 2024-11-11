@@ -39,8 +39,7 @@ void encode(Flags* commandLineArgs) {
     freeFrequencyArray(characterFrequencies, arrayLength);
 
     // Write Binary to Output File using Binary Tree
-
-
+    convertFile(myFiles.outputFile, huffmanTree, myFiles.inputFile);
 }
 
 void writeKeyPattern(FILE* outputFile, FrequencyArray** array, unsigned char arrayLength) {
@@ -115,7 +114,44 @@ void convertFile(FILE* outputFile, BinaryTree* tree, FILE* inputFile) {
     int character;
     while((character = fgetc(inputFile)) != EOF) {
         // Read character
+        encoderPathSeparator.combined = map[(unsigned char)character];
+        char pathBits = encoderPathSeparator.pathIndex[0];
+
         // Find length of encoded version
+        char pathLength = encoderPathSeparator.pathIndex[1];
+        
+        // Add necessary bits to the write buffer
+        // Decrement the buffer index
+        // If bufferIndex < 0 write current bits to the file and restart index at 7
+
+        // Bits will extend into the next variable;
+        char currentIndex = 7;
+        for(char i = 0; i < pathLength; i++) {
+            if(bufferIndex < 0) {
+                fwrite(writeBuffer, sizeof(char), 1, outputFile);
+                writeBuffer = 0;
+                bufferIndex = 7;
+            }
+            writeBuffer |= (((pathBits & (1<<(currentIndex - i))) > 0)>>bufferIndex);
+            bufferIndex--; 
+        }
     }
 
+    encoderPathSeparator.combined = map[0];
+    char pathBits = encoderPathSeparator.pathIndex[0];
+    char pathLength = encoderPathSeparator.pathIndex[1];
+
+    char currentIndex = 7;
+    for(char i = 0; i < pathLength; i++) {
+        if(bufferIndex < 0) {
+            fwrite(writeBuffer, sizeof(char), 1, outputFile);
+            writeBuffer = 0;
+            bufferIndex = 7;
+        }
+        writeBuffer |= (((pathBits & (1<<(currentIndex - i))) > 0)>>bufferIndex);
+        bufferIndex--; 
+    }
+
+    fwrite(writeBuffer, sizeof(char), 1, outputFile);
+    freeTreeMap(map);
 }

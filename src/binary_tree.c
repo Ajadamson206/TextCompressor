@@ -108,3 +108,11 @@ void treeTraverser(Heap* root, char row, char path, TreeMap** map) {
 
     treeTraverser(root->right, row + 1, path | (1<<(8-row)), map);
 }
+
+void freeTreeMap(TreeMap** map) {
+    for(int i = 0; i < 128; i++) {
+        free(map[i]);
+    }
+
+    free(map);
+} 
