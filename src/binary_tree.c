@@ -96,11 +96,11 @@ TreeMap** createTreeMap(BinaryTree* root) {
 
 void treeTraverser(Heap* root, char row, char path, TreeMap** map) {
     if(root->character != -1) {
-        map[root->character] = malloc(sizeof(*(map[root->character])));
+        map[(unsigned char)root->character] = malloc(sizeof(*(map[(unsigned char)root->character])));
         globPathSeparator.pathIndex[0] = path;
         globPathSeparator.pathIndex[1] = row;
 
-        map[root->character]->combinedPath = globPathSeparator.combined;
+        map[(unsigned char)root->character]->combinedPath = globPathSeparator.combined;
         return;
     }
 

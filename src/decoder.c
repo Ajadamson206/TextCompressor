@@ -23,9 +23,9 @@ void decode(Flags* commandLineArgs) {
 }
 
 char getNumCharacters(FILE* decodeFile) {
-
+    return 0;
 }
 
 char* getCharacterArray(FILE* decodeFile) {
-    
+    return 0;    
 }

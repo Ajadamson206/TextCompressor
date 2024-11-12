@@ -43,9 +43,9 @@ void encode(Flags* commandLineArgs) {
 }
 
 void writeKeyPattern(FILE* outputFile, FrequencyArray** array, unsigned char arrayLength) {
-    fwrite(arrayLength, sizeof(unsigned char), 1, outputFile);
+    fwrite(&arrayLength, sizeof(unsigned char), 1, outputFile);
     for(unsigned char i = 0; i < arrayLength; i++) {
-        fwrite(array[i]->character, sizeof(unsigned char), 1, outputFile);
+        fwrite(&(array[i]->character), sizeof(char), 1, outputFile);
     }
 }
 
@@ -114,7 +114,7 @@ void convertFile(FILE* outputFile, BinaryTree* tree, FILE* inputFile) {
     int character;
     while((character = fgetc(inputFile)) != EOF) {
         // Read character
-        encoderPathSeparator.combined = map[(unsigned char)character];
+        encoderPathSeparator.combined = map[(unsigned char)character]->combinedPath;
         char pathBits = encoderPathSeparator.pathIndex[0];
 
         // Find length of encoded version
@@ -128,7 +128,7 @@ void convertFile(FILE* outputFile, BinaryTree* tree, FILE* inputFile) {
         char currentIndex = 7;
         for(char i = 0; i < pathLength; i++) {
             if(bufferIndex < 0) {
-                fwrite(writeBuffer, sizeof(char), 1, outputFile);
+                fwrite(&writeBuffer, sizeof(char), 1, outputFile);
                 writeBuffer = 0;
                 bufferIndex = 7;
             }
@@ -137,14 +137,14 @@ void convertFile(FILE* outputFile, BinaryTree* tree, FILE* inputFile) {
         }
     }
 
-    encoderPathSeparator.combined = map[0];
+    encoderPathSeparator.combined = map[0]->combinedPath;
     char pathBits = encoderPathSeparator.pathIndex[0];
     char pathLength = encoderPathSeparator.pathIndex[1];
 
     char currentIndex = 7;
     for(char i = 0; i < pathLength; i++) {
         if(bufferIndex < 0) {
-            fwrite(writeBuffer, sizeof(char), 1, outputFile);
+            fwrite(&writeBuffer, sizeof(char), 1, outputFile);
             writeBuffer = 0;
             bufferIndex = 7;
         }
@@ -152,6 +152,6 @@ void convertFile(FILE* outputFile, BinaryTree* tree, FILE* inputFile) {
         bufferIndex--; 
     }
 
-    fwrite(writeBuffer, sizeof(char), 1, outputFile);
+    fwrite(&writeBuffer, sizeof(char), 1, outputFile);
     freeTreeMap(map);
 }
