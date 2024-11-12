@@ -15,9 +15,10 @@ static int compareFreqArray(const void* element1, const void* element2) {
     return 0;
 }
 
-void printFrequencyArray(FrequencyArray** array, int arrayLength) {
-    for(int i = 0; i < arrayLength; i++) {
-        printf("%c -> %lu\n", array[i]->character, (__uint64_t)(array[i]->frequency));
+void printFrequencyArray(FrequencyArray** array, unsigned char arrayLength) {
+    for(unsigned char i = 0; i < arrayLength; i++) {
+        printf("%c -> %lu\n", (*array)->character, (__uint64_t)((*array)->frequency));
+        array++;
     }
 }
 
@@ -28,7 +29,14 @@ void encode(Flags* commandLineArgs) {
     // Make a frequency map for each character.
     unsigned char arrayLength;
     FrequencyArray** characterFrequencies = frequencyMap(myFiles.inputFile, &arrayLength);
+
+    #ifdef DEBUG
     
+    printFrequencyElements(characterFrequencies, arrayLength);
+    
+    #endif    
+
+
     // Write Binary Tree to Output File -> Number of elements in the array, the order of elements
     writeKeyPattern(myFiles.outputFile, characterFrequencies, (unsigned char)arrayLength);
 
@@ -154,4 +162,12 @@ void convertFile(FILE* outputFile, BinaryTree* tree, FILE* inputFile) {
 
     fwrite(&writeBuffer, sizeof(char), 1, outputFile);
     freeTreeMap(map);
+}
+
+void printFrequencyElements(FrequencyArray** array, unsigned char arrayLength) {
+    for(unsigned char i = 0; i < arrayLength; i++) {
+        printf("%c, ", (*array)->character);
+        array++;
+    }
+    printf("\n");
 }
