@@ -1,0 +1,20 @@
+Fix program options and add support for long options as well
+
+Encoding:
+1. Fix encode function to support the new FileIO struct
+2. Improve the implemented huffman code algorithm (View fileformat.txt)
+
+Decoding:
+1. Start it
+2. Compressed files with a separate header will start with 8 0's
+
+General:
+1. Organize Code Base
+2. Multithreading support
+3. Test weird files (Files with spaces, don't end in txt, empty, etc)
+4. (Maybe) Unicode support for .txt files
+
+Extracting:
+1.  
+
+    

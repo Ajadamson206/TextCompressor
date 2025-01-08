@@ -1,0 +1,45 @@
+Usage Examples:
+
+Encoding with built in key: ./Compressor -e File1.txt File2.txt File3.txt ...
+Decoding with built in key: ./Compressor -d File1.hc File2.hc File3.hc ...
+
+Options:
+    Encoding:
+        --encode
+        -e Encode files with this particular algorithm 
+            ./Compressor -e File1.txt
+        
+        --separate
+        -s Separate the key file from the outputted .hc file
+            ./Compressor -e -s File1.txt File2.txt -> You will get 2 key files
+
+        --merge
+        -m Merge multiple file keys into a single larger key
+            ./Compressor -e -m File1.txt File2.txt -> Each file header may contain unnecessary key information
+            ./Compressor -e -m -s File1.txt File2.txt -> Output a single key file that can be used on both .hc files
+    
+    Decoding:
+        --decode
+        -d Decode files
+            ./Compressor -d File2.hc
+        
+        --key
+        -k Specify the location of the key file if it is not built into the file
+            ./Compressor -d -k hc_key.key File2.hc File3.h
+    
+    Other:
+        --help
+        -h print help menu
+
+        --extract 
+        -x Extract the key in the file header from the already encoded file
+            ./Compressor -x File1.hc File2.hc -> Will output 4 files 2 will be .hc files without the key header and 2 will be key files
+
+        --threads
+        -t Specify number of threads to be used -> Each thread will work on a different file
+            ./Compressor -e File1.txt File2.txt -t 3 -> Only two threads will be used
+
+        --verbose Enable console logging
+
+
+

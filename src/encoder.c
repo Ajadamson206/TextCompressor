@@ -22,13 +22,10 @@ void printFrequencyArray(FrequencyArray** array, unsigned char arrayLength) {
     }
 }
 
-void encode(Flags* commandLineArgs) {
-    // Open/Create the necessary files
-    Files myFiles = openEncoderFiles(commandLineArgs);
-
+void encode(FileIO* files) {
     // Make a frequency map for each character.
     unsigned char arrayLength;
-    FrequencyArray** characterFrequencies = frequencyMap(myFiles.inputFile, &arrayLength);
+    FrequencyArray** characterFrequencies = frequencyMap(files->inputFile, &arrayLength);
 
     #ifdef DEBUG
     
@@ -38,7 +35,7 @@ void encode(Flags* commandLineArgs) {
 
 
     // Write Binary Tree to Output File -> Number of elements in the array, the order of elements
-    writeKeyPattern(myFiles.outputFile, characterFrequencies, (unsigned char)arrayLength);
+    // writeKeyPattern(myFiles.outputFile, characterFrequencies, (unsigned char)arrayLength);
 
     // Convert the frequency map to a binary tree
     BinaryTree* huffmanTree = createHuffmanCoding(characterFrequencies, arrayLength);

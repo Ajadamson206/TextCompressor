@@ -6,10 +6,10 @@
 
 typedef struct {
     __uint128_t frequency;
-    char character;
+    char character; 
 } FrequencyArray;
 
-extern void encode(Flags* commandLineArgs);
+extern void encode(FileIO* files);
 extern FrequencyArray** frequencyMap(FILE* textFile, unsigned char* frequencyArrayLength);
 extern void printFrequencyArray(FrequencyArray** array, unsigned char arrayLength);
 extern void freeFrequencyArray(FrequencyArray** array, unsigned char arrayLength);

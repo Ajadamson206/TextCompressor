@@ -27,9 +27,31 @@ Heap* mergeHeaps(Heap* heap1, Heap* heap2) {
     return merged;
 }
 
+int compareFrequencyMapElements(const void* element1, const void* element2) {
+    FrequencyArray* ele1 = (FrequencyArray*)element1;
+    FrequencyArray* ele2 = (FrequencyArray*)element2;
+
+    if(ele1->frequency > ele2->frequency)
+        return 1;
+    if(ele1->frequency < ele2->frequency)
+        return -1;
+    return 0;
+}
+
 BinaryTree* createHuffmanCoding(FrequencyArray** frequencyMap, int mapLength) {
+    // Sort the frequency map
+    qsort(frequencyMap, mapLength, sizeof(*frequencyMap), compareFrequencyMapElements);
+
     // Move the elements of frequency map into a heap
-    Heap** myHeap = malloc(sizeof(*myHeap) * ((mapLength + (mapLength & 1)) / 2));    
+    Heap** myHeap = malloc(sizeof(*myHeap) * ((mapLength + (mapLength & 1)) / 2));
+    if(myHeap == NULL) {
+        fprintf(stderr, "Memory allocation for initial heap creation failed\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Merge first two elements
+    myHeap[0] = createRoot(frequencyMap[0]->character, frequencyMap[1]->character);
+
     int heapIndex = 0;
     for(int i = 0; i < mapLength - 1; i += 2) {
         myHeap[heapIndex] = createRoot(frequencyMap[i]->character, frequencyMap[i+1]->character);

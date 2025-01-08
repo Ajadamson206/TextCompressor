@@ -1,0 +1,17 @@
+File header: (Encoding the key into the binary file)
+
+8 bits to represent the maximum level reached by the huffman tree
+1's and 0's representing the huffman tree. 
+    1 -> node exists. 0 -> node does not exist.
+
+Treat the binary like it is a complete binary tree represented by an array
+
+Demo header:
+    00000011 11111000 (An extra 0 was added to extend tree to the full 8 bits) -> 3 Node Node Node Node Node NULL NULL NULL 
+    
+Nodes with no children will have a character placed there signifying the end of the encoding
+
+After the tree binary is represented the characters that will be found in the tree starting from the left will be added.
+
+
+
