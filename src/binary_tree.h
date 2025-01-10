@@ -4,6 +4,7 @@
 
 typedef struct Heap{
     char character;
+    __uint128_t frequency;
 
     struct Heap* left;
     struct Heap* right;
@@ -20,15 +21,15 @@ typedef union PathSeparator {
 
 typedef Heap BinaryTree;
 
-extern Heap* createRoot(char character1, char character2);
 extern Heap* mergeHeaps(Heap* heap1, Heap* heap2);
-extern BinaryTree* createHuffmanCoding(FrequencyArray** frequencyMap, int mapLength);
+extern BinaryTree* createHuffmanCoding(Heap** frequencyMap, int mapLength);
 extern void freeTree(BinaryTree* tree);
 extern void freeHeap(Heap* heap);
 extern TreeMap** createTreeMap(BinaryTree* root);
 extern void treeTraverser(Heap* root, char row, char path, TreeMap** map);
 extern void freeTreeMap(TreeMap** map);
 extern void convertFile(FILE* outputFile, BinaryTree* tree, FILE* inputFile);
+extern int findTreeHeight(BinaryTree* root, int level);
 
 
 

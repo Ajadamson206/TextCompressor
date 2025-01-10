@@ -4,23 +4,10 @@
 
 static PathSeparator globPathSeparator;
 
-Heap* createRoot(char character1, char character2) {
-    Heap* root = malloc(sizeof(*root));
-    root->character = -1;
-
-    root->left = calloc(1, sizeof(*root));
-    root->right = calloc(1, sizeof(*root));
-
-    root->left->character = character1;
-
-    root->right->character = character2;
-
-    return root; 
-}
-
 Heap* mergeHeaps(Heap* heap1, Heap* heap2) {
     Heap* merged = malloc(sizeof(*merged));
     merged->character = -1;
+    merged->frequency = heap1->frequency + heap2->frequency;
     merged->left = heap1;
     merged->right = heap2;
 
@@ -28,8 +15,8 @@ Heap* mergeHeaps(Heap* heap1, Heap* heap2) {
 }
 
 int compareFrequencyMapElements(const void* element1, const void* element2) {
-    FrequencyArray* ele1 = (FrequencyArray*)element1;
-    FrequencyArray* ele2 = (FrequencyArray*)element2;
+    Heap* ele1 = (Heap*)element1;
+    Heap* ele2 = (Heap*)element2;
 
     if(ele1->frequency > ele2->frequency)
         return 1;
@@ -38,57 +25,41 @@ int compareFrequencyMapElements(const void* element1, const void* element2) {
     return 0;
 }
 
-BinaryTree* createHuffmanCoding(FrequencyArray** frequencyMap, int mapLength) {
+BinaryTree* createHuffmanCoding(Heap** frequencyMap, int mapLength) {
     // Sort the frequency map
     qsort(frequencyMap, mapLength, sizeof(*frequencyMap), compareFrequencyMapElements);
 
-    // Move the elements of frequency map into a heap
-    Heap** myHeap = malloc(sizeof(*myHeap) * ((mapLength + (mapLength & 1)) / 2));
-    if(myHeap == NULL) {
-        fprintf(stderr, "Memory allocation for initial heap creation failed\n");
-        exit(EXIT_FAILURE);
-    }
+    while(mapLength != 1) {
+        // Merge first two elements
+        Heap* temp = mergeHeaps(frequencyMap[0], frequencyMap[1]);
 
-    // Merge first two elements
-    myHeap[0] = createRoot(frequencyMap[0]->character, frequencyMap[1]->character);
-
-    int heapIndex = 0;
-    for(int i = 0; i < mapLength - 1; i += 2) {
-        myHeap[heapIndex] = createRoot(frequencyMap[i]->character, frequencyMap[i+1]->character);
-        heapIndex++;
-    }
-
-    // If the heap is of an odd length then the remaining element moves onto the next iteration
-    if(mapLength & 1) {
-        myHeap[heapIndex] = malloc(sizeof(myHeap[heapIndex]));
-        myHeap[heapIndex]->character = frequencyMap[mapLength - 1]->character;
-        myHeap[heapIndex]->left = NULL; 
-        myHeap[heapIndex]->right = NULL;
-        heapIndex++;
-    }
-
-    // Merge the elements in the heap until only one element remains
-    int heapLength = heapIndex;
-    while(heapLength != 1) {
-        heapIndex = 0;
-        for(int i = 0; i < heapLength - 1; i += 2) {
-            myHeap[heapIndex] = mergeHeaps(myHeap[i], myHeap[i + 1]);
-            heapIndex++;
+        // Insertion Sort with the rest of the map
+        int startIndex = 0;
+        int rightIndex = 2;
+        while(rightIndex < mapLength && frequencyMap[rightIndex]->frequency < temp->frequency) {
+            frequencyMap[startIndex] = frequencyMap[rightIndex];
+            startIndex++;
+            rightIndex++;
+        }
+        frequencyMap[startIndex++] = temp;
+        while(rightIndex < mapLength) {
+            frequencyMap[startIndex++] = frequencyMap[rightIndex++];
         }
 
-        // If the heap is of an odd length then the remaining element moves onto the next iteration
-        if(heapLength & 1) {
-            myHeap[heapIndex] = myHeap[heapLength - 1];
-            heapIndex++;
-        }
-
-        heapLength = heapIndex;
+        // Decrement Map Length
+        mapLength--;
     }
 
-    BinaryTree* root = (BinaryTree*)myHeap[0];
-    free(myHeap);
+    BinaryTree* root = (BinaryTree*)frequencyMap[0];
 
     return root;
+}
+
+void printHeap(Heap** heap, int length) {
+    for(int i = 0; i < length; i++) {
+        printf("%c, ", heap[i]->character);
+    }
+    printf("\n");
 }
 
 void freeTree(BinaryTree* tree) {
@@ -111,7 +82,7 @@ void freeHeap(Heap* heap) {
 TreeMap** createTreeMap(BinaryTree* root) {
     TreeMap** map = calloc(128, sizeof(*map));
 
-    treeTraverser((Heap*)root, 1, 0, map);
+    ((Heap*)root, 1, 0, map);
 
     return map;
 }
@@ -137,4 +108,19 @@ void freeTreeMap(TreeMap** map) {
     }
 
     free(map);
-} 
+}
+
+int findTreeHeight(BinaryTree* root, int level) {
+    if(root == NULL) {
+        return level - 1;
+    }
+
+    if(root->left == NULL && root->right == NULL) {
+        return level;
+    }
+
+    int left = findTreeHeight(root->left, level + 1);
+    int right = findTreeHeight(root->right, level + 1);
+
+    return (left > right)? left : right;
+}

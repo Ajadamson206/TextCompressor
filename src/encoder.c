@@ -7,15 +7,15 @@
 static PathSeparator encoderPathSeparator;
 
 static int compareFreqArray(const void* element1, const void* element2) {
-    FrequencyArray* a = *(FrequencyArray**)element1;
-    FrequencyArray* b = *(FrequencyArray**)element2;
+    Heap* a = *(Heap**)element1;
+    Heap* b = *(Heap**)element2;
 
     if (a->frequency < b->frequency) return -1;
     if (a->frequency > b->frequency) return 1;
     return 0;
 }
 
-void printFrequencyArray(FrequencyArray** array, unsigned char arrayLength) {
+void printFrequencyArray(Heap** array, unsigned char arrayLength) {
     for(unsigned char i = 0; i < arrayLength; i++) {
         printf("%c -> %lu\n", (*array)->character, (__uint64_t)((*array)->frequency));
         array++;
@@ -25,7 +25,7 @@ void printFrequencyArray(FrequencyArray** array, unsigned char arrayLength) {
 void encode(FileIO* files) {
     // Make a frequency map for each character.
     unsigned char arrayLength;
-    FrequencyArray** characterFrequencies = frequencyMap(files->inputFile, &arrayLength);
+    Heap** characterFrequencies = frequencyMap(files->inputFile, &arrayLength);
 
     #ifdef DEBUG
     
@@ -39,37 +39,44 @@ void encode(FileIO* files) {
 
     // Convert the frequency map to a binary tree
     BinaryTree* huffmanTree = createHuffmanCoding(characterFrequencies, arrayLength);
-
-    // Free characterFrequencies
-    freeFrequencyArray(characterFrequencies, arrayLength);
+    free(characterFrequencies);
 
     // Write Binary to Output File using Binary Tree
-    convertFile(myFiles.outputFile, huffmanTree, myFiles.inputFile);
+    cronvetFile(files->ouptutFile, huffmanTree, files->inputFile);
 }
 
-void writeKeyPattern(FILE* outputFile, FrequencyArray** array, unsigned char arrayLength) {
+void writeKeyPattern(FILE* outputFile, Heap** array, unsigned char arrayLength) {
     fwrite(&arrayLength, sizeof(unsigned char), 1, outputFile);
     for(unsigned char i = 0; i < arrayLength; i++) {
         fwrite(&(array[i]->character), sizeof(char), 1, outputFile);
     }
 }
 
-FrequencyArray** frequencyMap(FILE* textFile, unsigned char* frequencyArrayLength) {
+/**
+ * @brief Create a frequency map to determine how many times a particular character occurs in a file
+ * @param textFile (FILE*) File pointer to the file that is going to be opened and read from
+ * @param frequencyArrayLength (unsigned char*) Pointer to the variable that is going to hold the array length
+ * @return (Heap**) Pointer to the Heap Array which contains both the character and how many 
+ * times it occurred.
+ */
+Heap** frequencyMap(FILE* textFile, unsigned char* frequencyArrayLength) {
+    // Get a 128 bit array of each ascii character, and how many times it occurred
     __uint128_t characterMap[128] = {0};  
-    __uint128_t characterCount = 0;
     unsigned char uniqueCharacters = 0;
 
+    // Read file character at a time and input it into the character map
     int character;
     while((character = fgetc(textFile)) != EOF) {
         if(characterMap[character] == 0)
             uniqueCharacters++;
     
         characterMap[character]++;
-        characterCount++;
     }
 
+    // Start at beginning again
     rewind(textFile);
 
+    // Empty files raise an error
     if(uniqueCharacters == 0) {
         fprintf(stderr, "Unable to read from file");
         exit(EXIT_FAILURE);
@@ -81,31 +88,23 @@ FrequencyArray** frequencyMap(FILE* textFile, unsigned char* frequencyArrayLengt
     size_t arrayLength = uniqueCharacters;
     *frequencyArrayLength = uniqueCharacters;
 
-    FrequencyArray** array = malloc(sizeof(*array) * uniqueCharacters);
+    Heap** array = malloc(sizeof(*array) * uniqueCharacters);
     uniqueCharacters--;    
     
-    for(char i = 0; i >= 0; i++) {
-        if(characterMap[(unsigned char)i] != 0) {
+    // Move character map into frequency array
+    for(unsigned char i = 0; i < 128; i++) {
+        if(characterMap[i] != 0) {
             array[uniqueCharacters] = malloc(sizeof(**array));
-            array[uniqueCharacters]->character = i;
-            array[uniqueCharacters]->frequency = characterMap[(unsigned char)i];
+            array[uniqueCharacters]->character = (char)i;
+            array[uniqueCharacters]->frequency = characterMap[i];
+            array[uniqueCharacters]->left = NULL;
+            array[uniqueCharacters]->right = NULL;
 
             uniqueCharacters--;
         }
     }
 
-    qsort(array, arrayLength, sizeof(*array), compareFreqArray);    
-
     return array;
-}
-
-void freeFrequencyArray(FrequencyArray** array, unsigned char arrayLength) {
-    FrequencyArray** start = array;
-    for(int i = 0; i < arrayLength; i++) {
-        free(*array++);
-    }
-
-    free(start);
 }
 
 void convertFile(FILE* outputFile, BinaryTree* tree, FILE* inputFile) {
@@ -159,12 +158,4 @@ void convertFile(FILE* outputFile, BinaryTree* tree, FILE* inputFile) {
 
     fwrite(&writeBuffer, sizeof(char), 1, outputFile);
     freeTreeMap(map);
-}
-
-void printFrequencyElements(FrequencyArray** array, unsigned char arrayLength) {
-    for(unsigned char i = 0; i < arrayLength; i++) {
-        printf("%c, ", (*array)->character);
-        array++;
-    }
-    printf("\n");
 }
